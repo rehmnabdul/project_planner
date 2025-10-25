@@ -1,5 +1,6 @@
 using System;
-using PlexProjectPlanner.Core.ValueObjects;
+using TaskStatus = PlexProjectPlanner.Core.ValueObjects.TaskStatus;
+using TaskPriority = PlexProjectPlanner.Core.ValueObjects.TaskPriority;
 
 namespace PlexProjectPlanner.Application.Commands
 {

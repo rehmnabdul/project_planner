@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using PlexProjectPlanner.Core.Entities;
 using PlexProjectPlanner.Core.Interfaces;
+using PlexProjectPlanner.Core.ValueObjects;
 
 namespace PlexProjectPlanner.Core.DomainServices
 {

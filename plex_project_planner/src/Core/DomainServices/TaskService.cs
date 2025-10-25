@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using PlexProjectPlanner.Core.Entities;
+using TaskEntity = PlexProjectPlanner.Core.Entities.Task;
 using PlexProjectPlanner.Core.Interfaces;
 using PlexProjectPlanner.Core.ValueObjects;
 
@@ -19,7 +19,7 @@ namespace PlexProjectPlanner.Core.DomainServices
             _loggingService = loggingService;
         }
 
-        public async Task<Task> CreateTaskAsync(string title, string? description, Guid projectId, 
+        public async Task<TaskEntity> CreateTaskAsync(string title, string? description, Guid projectId, 
             Guid? assigneeId, TaskPriority priority, DateTime? dueDate, Guid createdBy)
         {
             try
@@ -37,7 +37,7 @@ namespace PlexProjectPlanner.Core.DomainServices
                 }
 
                 // Create new task
-                var task = new Task(title, projectId, createdBy);
+                var task = new TaskEntity(title, projectId, createdBy);
                 task.SetDescription(description);
                 task.SetAssignee(assigneeId);
                 task.SetPriority(priority);
@@ -56,8 +56,8 @@ namespace PlexProjectPlanner.Core.DomainServices
             }
         }
 
-        public async Task<Task> UpdateTaskAsync(Guid taskId, string title, string? description, 
-            Guid? assigneeId, TaskPriority priority, TaskStatus status, DateTime? dueDate, int position)
+        public async Task<TaskEntity> UpdateTaskAsync(Guid taskId, string title, string? description, 
+            Guid? assigneeId, TaskPriority priority, Core.ValueObjects.TaskStatus status, DateTime? dueDate, int position)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace PlexProjectPlanner.Core.DomainServices
             }
         }
 
-        public async Task<Task> GetTaskByIdAsync(Guid taskId)
+        public async Task<TaskEntity> GetTaskByIdAsync(Guid taskId)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace PlexProjectPlanner.Core.DomainServices
             }
         }
 
-        public async Task<Task> UpdateTaskStatusAsync(Guid taskId, TaskStatus newStatus)
+        public async Task<TaskEntity> UpdateTaskStatusAsync(Guid taskId, Core.ValueObjects.TaskStatus newStatus)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace PlexProjectPlanner.Core.DomainServices
             }
         }
 
-        public async Task<Task> AssignTaskAsync(Guid taskId, Guid? assigneeId)
+        public async Task<TaskEntity> AssignTaskAsync(Guid taskId, Guid? assigneeId)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace PlexProjectPlanner.Core.DomainServices
             }
         }
 
-        public async Task<Task> MoveTaskToProjectAsync(Guid taskId, Guid newProjectId)
+        public async Task<TaskEntity> MoveTaskToProjectAsync(Guid taskId, Guid newProjectId)
         {
             try
             {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TaskEntity = PlexProjectPlanner.Core.Entities.Task;
 using PlexProjectPlanner.Core.Interfaces;
 using PlexProjectPlanner.Core.Entities;
 
@@ -62,7 +63,7 @@ namespace PlexProjectPlanner.Application.Services
                 }
 
                 // Search tasks
-                var allTasks = new List<Task>();
+                var allTasks = new List<TaskEntity>();
                 foreach (var projectId in allProjects.Select(p => p.Id))
                 {
                     var tasks = await _taskRepository.GetByProjectIdAsync(projectId);

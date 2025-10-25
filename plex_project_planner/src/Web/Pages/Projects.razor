@@ -1,5 +1,9 @@
 @page "/projects"
-@using PlexProjectPlanner.Core.Entities
+@using TaskEntity = PlexProjectPlanner.Core.Entities.Task
+@using ProjectEntity = PlexProjectPlanner.Core.Entities.Project
+@using UserEntity = PlexProjectPlanner.Core.Entities.User
+@using ProjectSettingsEntity = PlexProjectPlanner.Core.ValueObjects.ProjectSettings
+@using ProjectStatusEntity = PlexProjectPlanner.Core.Entities.ProjectStatus
 @using PlexProjectPlanner.Application.DTOs
 @inject HttpClient Http
 

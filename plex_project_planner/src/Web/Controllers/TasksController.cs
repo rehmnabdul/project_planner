@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TaskEntity = PlexProjectPlanner.Core.Entities.Task;
+using TaskStatus = PlexProjectPlanner.Core.ValueObjects.TaskStatus;
+using TaskPriority = PlexProjectPlanner.Core.ValueObjects.TaskPriority;
 using PlexProjectPlanner.Application.Commands;
 using PlexProjectPlanner.Core.DomainServices;
-using PlexProjectPlanner.Core.Entities;
 using PlexProjectPlanner.Core.ValueObjects;
 using PlexProjectPlanner.Application.DTOs;
 
@@ -28,7 +30,7 @@ namespace PlexProjectPlanner.Web.Controllers
         {
             // Implementation would retrieve tasks based on the filters
             // For now, returning a placeholder response
-            var tasks = new List<Task>(); // Placeholder
+            var tasks = new List<TaskEntity>(); // Placeholder
             return Ok(tasks);
         }
 
@@ -62,7 +64,7 @@ namespace PlexProjectPlanner.Web.Controllers
         {
             // Implementation would retrieve tasks by project ID and optional status
             // For now, returning a placeholder response
-            var tasks = new List<Task>(); // Placeholder
+            var tasks = new List<TaskEntity>(); // Placeholder
             return Ok(tasks);
         }
 

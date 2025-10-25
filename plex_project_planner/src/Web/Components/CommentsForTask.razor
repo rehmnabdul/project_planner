@@ -1,5 +1,7 @@
-@using PlexProjectPlanner.Core.Entities
+@using TaskEntity = PlexProjectPlanner.Core.Entities.Task
+@using CommentEntity = PlexProjectPlanner.Core.Entities.Comment
 @using PlexProjectPlanner.Application.DTOs
+@using PlexProjectPlanner.Core.Interfaces
 @inject HttpClient Http
 @inject ILoggingService LoggingService
 
@@ -66,7 +68,7 @@
 @code {
     [Parameter] public Guid TaskId { get; set; }
     
-    private List<Comment> comments;
+    private List<CommentEntity> comments;
     private string newCommentContent = "";
     private bool isAddingComment = false;
     
@@ -81,13 +83,13 @@
         {
             // In a real application, this would call the API to get comments for the task
             // For now, creating mock data
-            comments = new List<Comment>();
+            comments = new List<CommentEntity>();
             StateHasChanged();
         }
         catch (Exception ex)
         {
             await LoggingService.LogErrorAsync($"Error loading comments for task {TaskId}: {ex.Message}", "CommentsComponent", ex);
-            comments = new List<Comment>();
+            comments = new List<CommentEntity>();
         }
     }
     

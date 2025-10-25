@@ -1,5 +1,8 @@
 @page "/tasks"
-@using PlexProjectPlanner.Core.Entities
+@using TaskEntity = PlexProjectPlanner.Core.Entities.Task
+@using TaskStatusEntity = PlexProjectPlanner.Core.ValueObjects.TaskStatus
+@using TaskPriorityEntity = PlexProjectPlanner.Core.ValueObjects.TaskPriority
+@using ProjectEntity = PlexProjectPlanner.Core.Entities.Project
 @using PlexProjectPlanner.Core.ValueObjects
 @using PlexProjectPlanner.Application.DTOs
 @inject HttpClient Http
@@ -169,15 +172,15 @@
         };
     }
 
-    private string GetStatusBadgeClass(TaskStatus status)
+    private string GetStatusBadgeClass(TaskStatusEntity status)
     {
         return status switch
         {
-            TaskStatus.ToDo => "bg-secondary",
-            TaskStatus.InProgress => "bg-primary",
-            TaskStatus.CodeReview => "bg-info",
-            TaskStatus.Testing => "bg-warning",
-            TaskStatus.Done => "bg-success",
+            TaskStatusEntity.ToDo => "bg-secondary",
+            TaskStatusEntity.InProgress => "bg-primary",
+            TaskStatusEntity.CodeReview => "bg-info",
+            TaskStatusEntity.Testing => "bg-warning",
+            TaskStatusEntity.Done => "bg-success",
             _ => "bg-secondary"
         };
     }

@@ -1,6 +1,11 @@
 @page "/workflows"
-@using PlexProjectPlanner.Core.Entities
+@using TaskEntity = PlexProjectPlanner.Core.Entities.Task
+@using TaskStatusEntity = PlexProjectPlanner.Core.ValueObjects.TaskStatus
+@using WorkflowEntity = PlexProjectPlanner.Core.Entities.Workflow
+@using ProjectEntity = PlexProjectPlanner.Core.Entities.Project
 @using PlexProjectPlanner.Application.Commands
+@using PlexProjectPlanner.Core.Interfaces
+@using PlexProjectPlanner.Core.ValueObjects
 @inject HttpClient Http
 @inject ILoggingService LoggingService
 
@@ -108,7 +113,7 @@
 </div>
 
 @code {
-    private List<Workflow> workflows;
+    private List<WorkflowEntity> workflows;
     private bool showCreateModal = false;
     private string newWorkflowName = "";
     private Guid selectedProjectId = Guid.Empty;
@@ -125,9 +130,9 @@
         {
             // In a real application, this would call the API
             // For now, creating mock data
-            workflows = new List<Workflow>
+            workflows = new List<WorkflowEntity>
             {
-                new Workflow("Default Workflow", Guid.NewGuid(), Guid.NewGuid())
+                new WorkflowEntity("Default Workflow", Guid.NewGuid(), Guid.NewGuid())
             };
             
             // Manually add some statuses to the mock workflow

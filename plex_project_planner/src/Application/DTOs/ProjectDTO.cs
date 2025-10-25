@@ -1,5 +1,6 @@
 using System;
-using PlexProjectPlanner.Core.ValueObjects;
+using ProjectStatus = PlexProjectPlanner.Core.Entities.ProjectStatus;
+using ProjectSettings = PlexProjectPlanner.Core.ValueObjects.ProjectSettings;
 
 namespace PlexProjectPlanner.Application.DTOs
 {

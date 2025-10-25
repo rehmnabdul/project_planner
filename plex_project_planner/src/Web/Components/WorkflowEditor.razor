@@ -1,4 +1,10 @@
-@using PlexProjectPlanner.Core.Entities
+@using TaskEntity = PlexProjectPlanner.Core.Entities.Task
+@using TaskStatusEntity = PlexProjectPlanner.Core.ValueObjects.TaskStatus
+@using WorkflowEntity = PlexProjectPlanner.Core.Entities.Workflow
+@using ProjectEntity = PlexProjectPlanner.Core.Entities.Project
+@using PlexProjectPlanner.Application.Commands
+@using PlexProjectPlanner.Core.Interfaces
+@using PlexProjectPlanner.Core.ValueObjects
 @inject NavigationManager Navigation
 
 <div class="workflow-editor">
@@ -58,7 +64,7 @@
 </div>
 
 @code {
-    [Parameter] public Workflow Workflow { get; set; }
+    [Parameter] public WorkflowEntity Workflow { get; set; }
     
     private List<string> statuses = new List<string>();
     private List<TransitionConfig> transitions = new List<TransitionConfig>();

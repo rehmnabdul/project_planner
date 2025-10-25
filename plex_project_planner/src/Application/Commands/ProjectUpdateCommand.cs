@@ -1,5 +1,5 @@
 using System;
-using PlexProjectPlanner.Core.ValueObjects;
+using ProjectStatus = PlexProjectPlanner.Core.Entities.ProjectStatus;
 
 namespace PlexProjectPlanner.Application.Commands
 {

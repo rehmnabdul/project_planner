@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using PlexProjectPlanner.Core.Entities;
+using TaskEntity = PlexProjectPlanner.Core.Entities.Task;
+using ProjectEntity = PlexProjectPlanner.Core.Entities.Project;
+using UserEntity = PlexProjectPlanner.Core.Entities.User;
+using CommentEntity = PlexProjectPlanner.Core.Entities.Comment;
+using AttachmentEntity = PlexProjectPlanner.Core.Entities.Attachment;
+using WorkflowEntity = PlexProjectPlanner.Core.Entities.Workflow;
 
 namespace PlexProjectPlanner.Infrastructure.Persistence
 {
@@ -9,19 +14,19 @@ namespace PlexProjectPlanner.Infrastructure.Persistence
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<Task> Tasks { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<Workflow> Workflows { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<ProjectEntity> Projects { get; set; }
+        public DbSet<TaskEntity> Tasks { get; set; }
+        public DbSet<CommentEntity> Comments { get; set; }
+        public DbSet<AttachmentEntity> Attachments { get; set; }
+        public DbSet<WorkflowEntity> Workflows { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Configure User entity
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<UserEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
@@ -31,64 +36,64 @@ namespace PlexProjectPlanner.Infrastructure.Persistence
             });
 
             // Configure Project entity
-            modelBuilder.Entity<Project>(entity =>
+            modelBuilder.Entity<ProjectEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Description).HasMaxLength(1000);
-                entity.HasOne<User>()
+                entity.HasOne<UserEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.CreatedBy)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Configure Task entity
-            modelBuilder.Entity<Task>(entity =>
+            modelBuilder.Entity<TaskEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.Description).HasMaxLength(2000);
-                entity.HasOne<Project>()
+                entity.HasOne<ProjectEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.ProjectId)
                       .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne<User>()
+                entity.HasOne<UserEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.AssigneeId)
                       .OnDelete(DeleteBehavior.SetNull);
-                entity.HasOne<User>()
+                entity.HasOne<UserEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.CreatedBy)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Configure Comment entity
-            modelBuilder.Entity<Comment>(entity =>
+            modelBuilder.Entity<CommentEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Content).IsRequired().HasMaxLength(2000);
-                entity.HasOne<Task>()
+                entity.HasOne<TaskEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.TaskId)
                       .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne<User>()
+                entity.HasOne<UserEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.AuthorId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Configure Attachment entity
-            modelBuilder.Entity<Attachment>(entity =>
+            modelBuilder.Entity<AttachmentEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.FileName).IsRequired().HasMaxLength(256);
                 entity.Property(e => e.ContentType).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.StoragePath).IsRequired().HasMaxLength(500);
-                entity.HasOne<User>()
+                entity.HasOne<UserEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.UploadedBy)
                       .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne<Task>()
+                entity.HasOne<TaskEntity>()
                       .WithMany()
                       .HasForeignKey(e => e.TaskId)
                       .OnDelete(DeleteBehavior.Cascade);

@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexProjectPlanner.Core.Entities;
+using TaskEntity = PlexProjectPlanner.Core.Entities.Task;
 
 namespace PlexProjectPlanner.Core.Interfaces
 {
     public interface ITaskRepository
     {
-        Task<Task> GetByIdAsync(Guid id);
-        Task<IEnumerable<Task>> GetByProjectIdAsync(Guid projectId);
-        Task<IEnumerable<Task>> GetByAssigneeIdAsync(Guid assigneeId);
-        Task<IEnumerable<Task>> GetByStatusAsync(string status);
-        Task<IEnumerable<Task>> GetByUserIdAsync(Guid userId);
-        Task<Task> CreateAsync(Task task);
-        Task<Task> UpdateAsync(Task task);
+        Task<TaskEntity> GetByIdAsync(Guid id);
+        Task<IEnumerable<TaskEntity>> GetByProjectIdAsync(Guid projectId);
+        Task<IEnumerable<TaskEntity>> GetByAssigneeIdAsync(Guid assigneeId);
+        Task<IEnumerable<TaskEntity>> GetByStatusAsync(string status);
+        Task<IEnumerable<TaskEntity>> GetByUserIdAsync(Guid userId);
+        Task<TaskEntity> CreateAsync(TaskEntity task);
+        Task<TaskEntity> UpdateAsync(TaskEntity task);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
-        Task<IEnumerable<Task>> SearchTasksAsync(string query);
-        Task<IEnumerable<Task>> GetByProjectAndStatusAsync(Guid projectId, string status);
+        Task<IEnumerable<TaskEntity>> SearchTasksAsync(string query);
+        Task<IEnumerable<TaskEntity>> GetByProjectAndStatusAsync(Guid projectId, string status);
     }
 }
