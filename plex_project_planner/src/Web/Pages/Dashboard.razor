@@ -1,0 +1,283 @@
+@page "/dashboard"
+@using PlexProjectPlanner.Application.DTOs
+@using PlexProjectPlanner.Application.Queries
+@inject HttpClient Http
+@inject ILoggingService LoggingService
+
+<div class="dashboard">
+    <h3>Dashboard</h3>
+    
+    <div class="dashboard-filters mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="dateFrom" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="dateFrom" @bind="query.FromDate" />
+            </div>
+            <div class="col-md-3">
+                <label for="dateTo" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="dateTo" @bind="query.ToDate" />
+            </div>
+            <div class="col-md-3">
+                <label for="includeArchived" class="form-label">Include Archived</label>
+                <input type="checkbox" class="form-check-input" id="includeArchived" @bind="query.IncludeArchived" />
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary" @onclick="LoadDashboardData">Refresh</button>
+            </div>
+        </div>
+    </div>
+    
+    @if (dashboardData != null)
+    {
+        <div class="dashboard-stats row">
+            <div class="col-md-2">
+                <div class="stat-card bg-primary text-white p-3 rounded">
+                    <h5>@dashboardData.TotalProjects</h5>
+                    <p class="mb-0">Total Projects</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card bg-success text-white p-3 rounded">
+                    <h5>@dashboardData.ActiveProjects</h5>
+                    <p class="mb-0">Active Projects</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card bg-info text-white p-3 rounded">
+                    <h5>@dashboardData.TotalTasks</h5>
+                    <p class="mb-0">Total Tasks</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card bg-success text-white p-3 rounded">
+                    <h5>@dashboardData.CompletedTasks</h5>
+                    <p class="mb-0">Completed Tasks</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card bg-warning text-dark p-3 rounded">
+                    <h5>@dashboardData.InProgressTasks</h5>
+                    <p class="mb-0">In Progress</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card bg-danger text-white p-3 rounded">
+                    <h5>@dashboardData.OverdueTasks</h5>
+                    <p class="mb-0">Overdue Tasks</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content row mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Project Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (dashboardData.ProjectSummaries.Any())
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Total Tasks</th>
+                                        <th>Completed</th>
+                                        <th>Progress</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var project in dashboardData.ProjectSummaries)
+                                    {
+                                        <tr>
+                                            <td>@project.Name</td>
+                                            <td>@project.TotalTasks</td>
+                                            <td>@project.CompletedTasks</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar" 
+                                                         role="progressbar" 
+                                                         style="width: @project.CompletionPercentage%;"
+                                                         aria-valuenow="@project.CompletionPercentage"
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                        @project.CompletionPercentage.ToString("F1")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No projects found.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Tasks</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (dashboardData.TaskSummaries.Any())
+                        {
+                            @foreach (var task in dashboardData.TaskSummaries.Take(5))
+                            {
+                                <div class="task-summary mb-2 p-2 border rounded">
+                                    <div class="task-title fw-bold">@task.Title</div>
+                                    <div class="task-project text-muted small">Project: @task.ProjectName</div>
+                                    <div class="task-status">
+                                        <span class="badge @GetStatusBadgeClass(task.Status)">@task.Status</span>
+                                        <span class="badge @GetPriorityBadgeClass(task.Priority)">@task.Priority</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>No recent tasks.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Click "Refresh" to load dashboard data.</p>
+    }
+</div>
+
+@code {
+    private DashboardDTO dashboardData;
+    private bool isLoading = false;
+    private DashboardQuery query = new DashboardQuery 
+    { 
+        UserId = Guid.Empty, // This would be set to the current user's ID
+        IncludeArchived = false 
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // In a real application, get the current user's ID
+        query.UserId = Guid.NewGuid(); // Placeholder
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            // In a real application, this would call the API
+            // For now, creating mock data
+            dashboardData = new DashboardDTO
+            {
+                TotalProjects = 5,
+                ActiveProjects = 3,
+                CompletedProjects = 1,
+                TotalTasks = 25,
+                CompletedTasks = 15,
+                InProgressTasks = 7,
+                OverdueTasks = 3,
+                GeneratedAt = DateTime.Now,
+                ProjectSummaries = new List<ProjectSummaryDTO>
+                {
+                    new ProjectSummaryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Project Alpha",
+                        TotalTasks = 10,
+                        CompletedTasks = 7,
+                        InProgressTasks = 2,
+                        CompletionPercentage = 70.0m,
+                        CreatedAt = DateTime.Now.AddDays(-10)
+                    },
+                    new ProjectSummaryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Project Beta",
+                        TotalTasks = 8,
+                        CompletedTasks = 5,
+                        InProgressTasks = 1,
+                        CompletionPercentage = 62.5m,
+                        CreatedAt = DateTime.Now.AddDays(-5)
+                    }
+                },
+                TaskSummaries = new List<TaskSummaryDTO>
+                {
+                    new TaskSummaryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = "Implement authentication",
+                        ProjectName = "Project Alpha",
+                        Status = "Done",
+                        Priority = "High",
+                        DueDate = DateTime.Now.AddDays(-2),
+                        CreatedAt = DateTime.Now.AddDays(-5)
+                    },
+                    new TaskSummaryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = "Design database schema",
+                        ProjectName = "Project Beta",
+                        Status = "In Progress",
+                        Priority = "Medium",
+                        DueDate = DateTime.Now.AddDays(3),
+                        CreatedAt = DateTime.Now.AddDays(-3)
+                    }
+                }
+            };
+
+            await Task.Delay(500); // Simulate API call delay
+        }
+        catch (Exception ex)
+        {
+            await LoggingService.LogErrorAsync($"Error loading dashboard: {ex.Message}", "DashboardComponent", ex);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Done" => "bg-success",
+            "In Progress" => "bg-primary",
+            "To Do" => "bg-secondary",
+            "Testing" => "bg-warning",
+            "Code Review" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetPriorityBadgeClass(string priority)
+    {
+        return priority switch
+        {
+            "Urgent" => "bg-danger",
+            "High" => "bg-warning text-dark",
+            "Medium" => "bg-info text-dark",
+            "Low" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}

@@ -1,0 +1,84 @@
+@using PlexProjectPlanner.Application.DTOs
+@inject NavigationManager Navigation
+
+<div class="card mb-3 task-card" style="cursor: pointer;" @onclick="() => NavigateToTask()">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <h6 class="card-title">@Task.Title</h6>
+            <span class="badge @GetPriorityBadgeClass(Task.Priority)">@Task.Priority</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Task.Description))
+        {
+            <p class="card-text small">@Task.Description</p>
+        }
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="badge @GetStatusBadgeClass(Task.Status)">@Task.Status</span>
+            @if (Task.DueDate.HasValue)
+            {
+                <small class="text-muted">@GetDueDateDisplay()</small>
+            }
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Project: @Task.ProjectId</small>
+            <small class="text-muted">Updated: @Task.UpdatedAt.ToShortDateString()</small>
+        </div>
+    </div>
+</div>
+
+<style>
+    .task-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+</style>
+
+@code {
+    [Parameter] public TaskDTO Task { get; set; }
+    
+    private void NavigateToTask()
+    {
+        Navigation.NavigateTo($"/tasks/{Task.Id}");
+    }
+    
+    private string GetPriorityBadgeClass(PlexProjectPlanner.Core.ValueObjects.TaskPriority priority)
+    {
+        return priority switch
+        {
+            PlexProjectPlanner.Core.ValueObjects.TaskPriority.Urgent => "bg-danger",
+            PlexProjectPlanner.Core.ValueObjects.TaskPriority.High => "bg-warning text-dark",
+            PlexProjectPlanner.Core.ValueObjects.TaskPriority.Medium => "bg-info text-dark",
+            PlexProjectPlanner.Core.ValueObjects.TaskPriority.Low => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private string GetStatusBadgeClass(PlexProjectPlanner.Core.ValueObjects.TaskStatus status)
+    {
+        return status switch
+        {
+            PlexProjectPlanner.Core.ValueObjects.TaskStatus.ToDo => "bg-secondary",
+            PlexProjectPlanner.Core.ValueObjects.TaskStatus.InProgress => "bg-primary",
+            PlexProjectPlanner.Core.ValueObjects.TaskStatus.CodeReview => "bg-info",
+            PlexProjectPlanner.Core.ValueObjects.TaskStatus.Testing => "bg-warning text-dark",
+            PlexProjectPlanner.Core.ValueObjects.TaskStatus.Done => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private string GetDueDateDisplay()
+    {
+        if (!Task.DueDate.HasValue) return string.Empty;
+        
+        var daysUntilDue = (Task.DueDate.Value.Date - DateTime.Now.Date).Days;
+        
+        if (daysUntilDue < 0)
+            return $"Overdue by {Math.Abs(daysUntilDue)} days";
+        else if (daysUntilDue == 0)
+            return "Due today";
+        else
+            return $"Due in {daysUntilDue} days";
+    }
+}

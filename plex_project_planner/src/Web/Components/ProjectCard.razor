@@ -1,0 +1,56 @@
+@using PlexProjectPlanner.Application.DTOs
+@inject NavigationManager Navigation
+
+<div class="card mb-3 project-card" style="cursor: pointer;" @onclick="() => NavigateToProject()">
+    <div class="card-body">
+        <h5 class="card-title">@Project.Name</h5>
+        @if (!string.IsNullOrEmpty(Project.Description))
+        {
+            <p class="card-text">@Project.Description</p>
+        }
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Created: @Project.CreatedAt.ToShortDateString()</small>
+            <span class="badge @GetStatusBadgeClass(Project.Status)">@Project.Status</span>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Tasks: @GetTaskCount()</small>
+            <small class="text-muted">Updated: @Project.UpdatedAt.ToShortDateString()</small>
+        </div>
+    </div>
+</div>
+
+<style>
+    .project-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+</style>
+
+@code {
+    [Parameter] public ProjectDTO Project { get; set; }
+    
+    private void NavigateToProject()
+    {
+        Navigation.NavigateTo($"/projects/{Project.Id}");
+    }
+    
+    private string GetStatusBadgeClass(PlexProjectPlanner.Core.Entities.ProjectStatus status)
+    {
+        return status switch
+        {
+            PlexProjectPlanner.Core.Entities.ProjectStatus.Active => "bg-success",
+            PlexProjectPlanner.Core.Entities.ProjectStatus.Archived => "bg-secondary",
+            PlexProjectPlanner.Core.Entities.ProjectStatus.Completed => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private int GetTaskCount()
+    {
+        // In a real application, this would come from the project settings or a related task count
+        return 0; // Placeholder
+    }
+}

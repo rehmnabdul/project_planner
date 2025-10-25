@@ -1,0 +1,195 @@
+@page "/workflows"
+@using PlexProjectPlanner.Core.Entities
+@using PlexProjectPlanner.Application.Commands
+@inject HttpClient Http
+@inject ILoggingService LoggingService
+
+<div class="workflows">
+    <h3>Workflow Configuration</h3>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <button class="btn btn-primary" @onclick="ShowCreateWorkflowModal">Create New Workflow</button>
+        </div>
+    </div>
+    
+    @if (workflows != null)
+    {
+        <div class="row">
+            @foreach (var workflow in workflows)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">@workflow.Name</h5>
+                            @if (workflow.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h6>Statuses:</h6>
+                            <div class="mb-3">
+                                @foreach (var status in workflow.Statuses)
+                                {
+                                    <span class="badge bg-primary me-1">@status</span>
+                                }
+                            </div>
+                            
+                            <h6>Transitions:</h6>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var transition in workflow.Transitions)
+                                {
+                                    <li class="list-group-item p-1">
+                                        <strong>@transition.Key</strong> → @string.Join(", ", transition.Value)
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditWorkflow(workflow.Id)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteWorkflow(workflow.Id)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+    
+    @if (showCreateModal)
+    {
+        <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create New Workflow</h5>
+                        <button type="button" class="btn-close" @onclick="HideCreateWorkflowModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="workflowName" class="form-label">Workflow Name</label>
+                            <input type="text" class="form-control" id="workflowName" @bind="newWorkflowName" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="workflowProject" class="form-label">Project</label>
+                            <select class="form-select" id="workflowProject" @bind="selectedProjectId">
+                                <option value="">Select a Project</option>
+                                @* In a real app, populate this from available projects *@
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Statuses</label>
+                            @for (int i = 0; i < newWorkflowStatuses.Count; i++)
+                            {
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" @bind="newWorkflowStatuses[i]" placeholder="Status name" />
+                                    <button class="btn btn-outline-danger" type="button" @onclick="() => RemoveStatus(i)">Remove</button>
+                                </div>
+                            }
+                            <button class="btn btn-sm btn-outline-primary" @onclick="AddNewStatus">Add Status</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HideCreateWorkflowModal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @onclick="SaveWorkflow">Create Workflow</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Workflow> workflows;
+    private bool showCreateModal = false;
+    private string newWorkflowName = "";
+    private Guid selectedProjectId = Guid.Empty;
+    private List<string> newWorkflowStatuses = new List<string> { "To Do", "In Progress", "Done" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWorkflows();
+    }
+
+    private async Task LoadWorkflows()
+    {
+        try
+        {
+            // In a real application, this would call the API
+            // For now, creating mock data
+            workflows = new List<Workflow>
+            {
+                new Workflow("Default Workflow", Guid.NewGuid(), Guid.NewGuid())
+            };
+            
+            // Manually add some statuses to the mock workflow
+            workflows[0].AddStatus("Review");
+            workflows[0].AddStatus("Testing");
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await LoggingService.LogErrorAsync($"Error loading workflows: {ex.Message}", "WorkflowsComponent", ex);
+        }
+    }
+
+    private void ShowCreateWorkflowModal()
+    {
+        newWorkflowName = "";
+        selectedProjectId = Guid.Empty;
+        newWorkflowStatuses = new List<string> { "To Do", "In Progress", "Done" };
+        showCreateModal = true;
+    }
+
+    private void HideCreateWorkflowModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void AddNewStatus()
+    {
+        newWorkflowStatuses.Add("");
+    }
+
+    private void RemoveStatus(int index)
+    {
+        if (newWorkflowStatuses.Count > 1)
+        {
+            newWorkflowStatuses.RemoveAt(index);
+        }
+    }
+
+    private async Task SaveWorkflow()
+    {
+        if (string.IsNullOrWhiteSpace(newWorkflowName) || selectedProjectId == Guid.Empty)
+        {
+            // Show validation error
+            return;
+        }
+
+        // In a real application, this would call the API to save the workflow
+        // For now, just refresh the list
+        showCreateModal = false;
+        await LoadWorkflows();
+    }
+
+    private void EditWorkflow(Guid workflowId)
+    {
+        // Navigate to edit page or show edit modal
+    }
+
+    private async Task DeleteWorkflow(Guid workflowId)
+    {
+        // In a real application, this would call the API to delete the workflow
+        await LoadWorkflows();
+    }
+}

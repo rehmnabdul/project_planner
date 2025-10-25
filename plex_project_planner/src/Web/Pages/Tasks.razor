@@ -1,0 +1,184 @@
+@page "/tasks"
+@using PlexProjectPlanner.Core.Entities
+@using PlexProjectPlanner.Core.ValueObjects
+@using PlexProjectPlanner.Application.DTOs
+@inject HttpClient Http
+
+<h3>Tasks</h3>
+
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-primary" @onclick="CreateNewTask">Create New Task</button>
+    </div>
+</div>
+
+<div class="row mt-3">
+    @if (tasks != null)
+    {
+        @foreach (var task in tasks)
+        {
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@task.Title</h5>
+                        <p class="card-text">@task.Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge @GetPriorityBadgeClass(task.Priority)">@task.Priority</span>
+                            <span class="badge @GetStatusBadgeClass(task.Status)">@task.Status</span>
+                        </div>
+                        <small class="text-muted d-block mt-2">Project: @task.ProjectId</small>
+                        @if (task.DueDate.HasValue)
+                        {
+                            <small class="text-muted d-block">Due: @task.DueDate.Value.ToShortDateString()</small>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => LoadTask(task.Id)">View</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => EditTask(task.Id)">Edit</button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+</div>
+
+@if (showCreateModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Task</h5>
+                    <button type="button" class="btn-close" @onclick="() => showCreateModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="taskTitle" @bind="newTaskTitle" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="taskDescription" rows="3" @bind="newTaskDescription"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskProjectId" class="form-label">Project</label>
+                        <select class="form-select" id="taskProjectId" @bind="selectedProjectId">
+                            <option value="">Select a Project</option>
+                            @* In a real app, populate this from available projects *@
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskPriority" class="form-label">Priority</label>
+                        <select class="form-select" id="taskPriority" @bind="selectedPriority">
+                            @foreach (TaskPriority priority in Enum.GetValues(typeof(TaskPriority)))
+                            {
+                                <option value="@priority">@priority</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDueDate" class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="taskDueDate" @bind="newTaskDueDate" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showCreateModal = false">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveTask">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<TaskDTO> tasks;
+    private bool showCreateModal = false;
+    private string newTaskTitle = "";
+    private string newTaskDescription = "";
+    private Guid? selectedProjectId;
+    private TaskPriority selectedPriority = TaskPriority.Medium;
+    private DateTime? newTaskDueDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTasks();
+    }
+
+    private async Task LoadTasks()
+    {
+        try
+        {
+            // In a real application, this would call the API
+            // For now, creating mock data
+            tasks = new List<TaskDTO>();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Error loading tasks: {ex.Message}");
+        }
+    }
+
+    private void CreateNewTask()
+    {
+        newTaskTitle = "";
+        newTaskDescription = "";
+        selectedProjectId = null;
+        selectedPriority = TaskPriority.Medium;
+        newTaskDueDate = null;
+        showCreateModal = true;
+    }
+
+    private async Task SaveTask()
+    {
+        if (!string.IsNullOrWhiteSpace(newTaskTitle) && selectedProjectId.HasValue)
+        {
+            // In a real application, this would call the API to save the task
+            // For now, just refresh the list
+            showCreateModal = false;
+            await LoadTasks();
+        }
+    }
+
+    private void LoadTask(Guid taskId)
+    {
+        // Navigate to specific task page
+        // In a real application, this would navigate to /tasks/{taskId}
+    }
+
+    private void EditTask(Guid taskId)
+    {
+        // Open edit modal for the specific task
+        // In a real application, this would show the edit form
+    }
+
+    private string GetPriorityBadgeClass(TaskPriority priority)
+    {
+        return priority switch
+        {
+            TaskPriority.Urgent => "bg-danger",
+            TaskPriority.High => "bg-warning",
+            TaskPriority.Medium => "bg-info",
+            TaskPriority.Low => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusBadgeClass(TaskStatus status)
+    {
+        return status switch
+        {
+            TaskStatus.ToDo => "bg-secondary",
+            TaskStatus.InProgress => "bg-primary",
+            TaskStatus.CodeReview => "bg-info",
+            TaskStatus.Testing => "bg-warning",
+            TaskStatus.Done => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}

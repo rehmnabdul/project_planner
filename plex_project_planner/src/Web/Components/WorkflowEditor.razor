@@ -1,0 +1,134 @@
+@using PlexProjectPlanner.Core.Entities
+@inject NavigationManager Navigation
+
+<div class="workflow-editor">
+    <h4>Edit Workflow: @Workflow?.Name</h4>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Status Configuration</h5>
+            <div class="statuses-section">
+                @for (int i = 0; i < statuses.Count; i++)
+                {
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" @bind="statuses[i]" @bind:event="oninput" />
+                        <button class="btn btn-outline-danger" type="button" @onclick="() => RemoveStatus(i)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                }
+                <button class="btn btn-sm btn-outline-primary" @onclick="AddNewStatus">Add Status</button>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <h5>Transition Configuration</h5>
+            <div class="transitions-section">
+                @for (int i = 0; i < transitions.Count; i++)
+                {
+                    var transition = transitions[i];
+                    <div class="input-group mb-2">
+                        <select class="form-select" @bind="transition.FromStatus">
+                            @foreach (var status in statuses)
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                        <span class="input-group-text">→</span>
+                        <select class="form-select" @bind="transition.ToStatus">
+                            @foreach (var status in statuses)
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                        <button class="btn btn-outline-danger" type="button" @onclick="() => RemoveTransition(i)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                }
+                <button class="btn btn-sm btn-outline-primary" @onclick="AddNewTransition">Add Transition</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <button class="btn btn-success me-2" @onclick="SaveWorkflow">Save Changes</button>
+        <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Workflow Workflow { get; set; }
+    
+    private List<string> statuses = new List<string>();
+    private List<TransitionConfig> transitions = new List<TransitionConfig>();
+    
+    protected override void OnParametersSet()
+    {
+        if (Workflow != null)
+        {
+            statuses = new List<string>(Workflow.Statuses);
+            transitions = new List<TransitionConfig>();
+            
+            foreach (var kvp in Workflow.Transitions)
+            {
+                foreach (var toStatus in kvp.Value)
+                {
+                    transitions.Add(new TransitionConfig 
+                    { 
+                        FromStatus = kvp.Key, 
+                        ToStatus = toStatus 
+                    });
+                }
+            }
+        }
+    }
+    
+    private void AddNewStatus()
+    {
+        statuses.Add("");
+    }
+    
+    private void RemoveStatus(int index)
+    {
+        if (statuses.Count > 1)
+        {
+            var statusToRemove = statuses[index];
+            statuses.RemoveAt(index);
+            
+            // Remove associated transitions
+            transitions.RemoveAll(t => t.FromStatus == statusToRemove || t.ToStatus == statusToRemove);
+        }
+    }
+    
+    private void AddNewTransition()
+    {
+        transitions.Add(new TransitionConfig { FromStatus = statuses.FirstOrDefault() ?? "", ToStatus = statuses.FirstOrDefault() ?? "" });
+    }
+    
+    private void RemoveTransition(int index)
+    {
+        if (transitions.Count > 0)
+        {
+            transitions.RemoveAt(index);
+        }
+    }
+    
+    private async Task SaveWorkflow()
+    {
+        // In a real application, this would save the workflow configuration
+        // For now, just navigate back
+        Navigation.NavigateTo("/workflows");
+    }
+    
+    private void CancelEdit()
+    {
+        Navigation.NavigateTo("/workflows");
+    }
+    
+    public class TransitionConfig
+    {
+        public string FromStatus { get; set; }
+        public string ToStatus { get; set; }
+    }
+}

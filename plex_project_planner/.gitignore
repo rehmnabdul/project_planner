@@ -1,0 +1,83 @@
+## Dependencies
+bin/
+obj/
+out/
+.vs/
+.vscode/
+**/.DS_Store
+**/Thumbs.db
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.useroosccache
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio cache/options
+*.[Cc]ache
+*.log
+*.gpState
+*.VC.db
+*.VC.VC.opendb
+
+## NuGet Packages
+*.nupkg
+!src/**/package.json
+
+## .NET Core
+*.dotCover
+**/[Cc]overage
+**/[Cc]overage.xml
+
+## ASP.NET Core
+**/wwwroot/bower_components/
+
+## IDE
+.vscode/tasks.json
+.vscode/launch.json
+
+## Environment
+.env*
+!.env.example
+
+## Local development
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+
+## Secrets
+secrets/
+**/*.key
+**/*.crt
+**/*.pem
+**/secrets.json
+**/secrets.yaml
+**/secrets.yml
+
+## NuGet and Package Management
+packages/
+*.nuspec
+**/project.lock.json
+**/project.fragment.lock.json
+**/packages.lock.json
+
+## OS generated files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

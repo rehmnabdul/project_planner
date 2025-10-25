@@ -1,0 +1,126 @@
+@page "/projects"
+@using PlexProjectPlanner.Core.Entities
+@using PlexProjectPlanner.Application.DTOs
+@inject HttpClient Http
+
+<h3>Projects</h3>
+
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-primary" @onclick="CreateNewProject">Create New Project</button>
+    </div>
+</div>
+
+<div class="row mt-3">
+    @if (projects != null)
+    {
+        @foreach (var project in projects)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@project.Name</h5>
+                        <p class="card-text">@project.Description</p>
+                        <small class="text-muted">Created: @project.CreatedAt</small>
+                        <br />
+                        <small class="text-muted">Status: @project.Status</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => LoadProject(project.Id)">View</button>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => EditProject(project.Id)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+</div>
+
+@if (showCreateModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Project</h5>
+                    <button type="button" class="btn-close" @onclick="() => showCreateModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Project Name</label>
+                        <input type="text" class="form-control" id="projectName" @bind="newProjectName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3" @bind="newProjectDescription"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showCreateModal = false">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveProject">Save Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ProjectDTO> projects;
+    private bool showCreateModal = false;
+    private string newProjectName = "";
+    private string newProjectDescription = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjects();
+    }
+
+    private async Task LoadProjects()
+    {
+        try
+        {
+            // In a real application, this would call the API
+            // For now, creating mock data
+            projects = new List<ProjectDTO>();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Error loading projects: {ex.Message}");
+        }
+    }
+
+    private void CreateNewProject()
+    {
+        newProjectName = "";
+        newProjectDescription = "";
+        showCreateModal = true;
+    }
+
+    private async Task SaveProject()
+    {
+        if (!string.IsNullOrWhiteSpace(newProjectName))
+        {
+            // In a real application, this would call the API to save the project
+            // For now, just refresh the list
+            showCreateModal = false;
+            await LoadProjects();
+        }
+    }
+
+    private void LoadProject(Guid projectId)
+    {
+        // Navigate to specific project page
+        // In a real application, this would navigate to /projects/{projectId}
+    }
+
+    private void EditProject(Guid projectId)
+    {
+        // Open edit modal for the specific project
+        // In a real application, this would show the edit form
+    }
+}
